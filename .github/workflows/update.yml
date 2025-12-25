@@ -1,0 +1,65 @@
+name: Scoop Bucket Auto-Update
+
+on:
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+defaults:
+  run:
+    shell: pwsh
+
+jobs:
+  update:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Scoop and git
+        run: |
+          Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
+          iwr -useb get.scoop.sh | iex
+          scoop install git
+
+      - name: Update manifests and push
+        env:
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+
+          $env:PATH = "$env:USERPROFILE\\scoop\\shims;$env:PATH"
+
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git config core.autocrlf false
+
+          $checkver = "$env:USERPROFILE\\scoop\\apps\\scoop\\current\\bin\\checkver.ps1"
+          if (!(Test-Path -Path $checkver)) {
+            throw "checkver.ps1 not found at expected path: $checkver"
+          }
+
+          git fetch origin $env:BRANCH
+
+          Get-ChildItem -Path . -Filter "*.json" -File | ForEach-Object {
+            $app = $_.BaseName
+            & pwsh -NoProfile -ExecutionPolicy Bypass -File $checkver $app -Dir . -u
+
+            $changed = git status --porcelain -- $_.Name
+            if ($changed) {
+              git add -- $_.Name
+              git commit -m "Auto-update: $app"
+            }
+          }
+
+          $ahead = [int](git rev-list --count "origin/$env:BRANCH..HEAD")
+          if ($ahead -gt 0) {
+            git push origin "HEAD:$env:BRANCH"
+          } else {
+            Write-Host "No changes to push."
+          }
