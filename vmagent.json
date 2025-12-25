@@ -1,15 +1,8 @@
 {
     "version": "1.108.1",
-    "description": "vmagent - a tiny agent which helps you collect metrics from various sources.",
+    "description": "vmagent",
     "homepage": "https://docs.victoriametrics.com/vmagent/",
     "license": "Apache-2.0",
-    "notes": [
-        "Installed as a Windows Service named 'vmagent' via NSSM.",
-        "Service configuration (flags) example:",
-        "  nssm edit vmagent",
-        "Then start it:",
-        "  Start-Service vmagent"
-    ],
     "depends": "nssm",
     "architecture": {
         "64bit": {
@@ -22,7 +15,7 @@
     },
     "checkver": {
         "github": "VictoriaMetrics/VictoriaMetrics",
-        "regex": "vmutils-windows-amd64-v([\\d.]+)\\.zip"
+        "regex": "v([\\d.]+)" 
     },
     "autoupdate": {
         "architecture": {
@@ -32,26 +25,17 @@
         }
     },
     "post_install": [
-        "if (!(is_admin)) { error 'Service registration requires Administrator privileges. Re-run this install in an elevated terminal.'; exit 1 }",
-        "Write-Host 'Registering vmagent service via NSSM...' -ForegroundColor Cyan",
-        "# If the service already exists (e.g. reinstall/update), remove it first to keep the setup deterministic.",
+        "if (!(is_admin)) { error 'Service registration requires Administrator privileges.'; exit 1 }",
         "if (Get-Service vmagent -ErrorAction SilentlyContinue) { try { Stop-Service vmagent -ErrorAction SilentlyContinue } catch {}; & nssm remove vmagent confirm | Out-Null }",
-        "& nssm install vmagent \"$dir\\\\vmagent-windows-amd64-prod.exe\" | Out-Null",
+        "& nssm install vmagent \"$dir\\vmagent-windows-amd64-prod.exe\" | Out-Null",
         "& nssm set vmagent AppDirectory \"$dir\" | Out-Null",
         "& nssm set vmagent DisplayName \"VictoriaMetrics Agent (vmagent)\" | Out-Null",
         "& nssm set vmagent Description \"Collects metrics and sends them to VictoriaMetrics or Prometheus.\" | Out-Null",
         "& nssm set vmagent Start SERVICE_AUTO_START | Out-Null",
-        "# vmagent usually needs flags (scrape config and/or remoteWrite target). Configure them via NSSM UI:",
-        "#   nssm edit vmagent",
-        "# Or set default parameters here if you prefer, e.g.:",
-        "#   & nssm set vmagent AppParameters \"-promscrape.config=`\"$dir\\\\prometheus.yml`\"\"",
         "Write-Host 'Service registered. Configure flags with: nssm edit vmagent' -ForegroundColor Yellow"
     ],
     "pre_uninstall": [
-        "if (!(is_admin)) { error 'Service removal requires Administrator privileges. Re-run this uninstall in an elevated terminal.'; exit 1 }",
-        "Write-Host 'Stopping and removing vmagent service...' -ForegroundColor Cyan",
+        "if (!(is_admin)) { error 'Service removal requires Administrator privileges.'; exit 1 }",
         "if (Get-Service vmagent -ErrorAction SilentlyContinue) { try { Stop-Service vmagent -ErrorAction SilentlyContinue } catch {}; & nssm remove vmagent confirm | Out-Null }"
     ]
 }
-
-
