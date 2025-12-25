@@ -14,17 +14,11 @@
     "architecture": {
         "64bit": {
             "url": "https://github.com/VictoriaMetrics/VictoriaMetrics/releases/download/v1.108.1/vmutils-windows-amd64-v1.108.1.zip",
-            "hash": "auto",
-            "bin": [
-                [
-                    "vmagent-windows-amd64-prod.exe",
-                    "vmagent"
-                ]
-            ]
+            "hash": "auto"
         }
     },
     "checkver": {
-        "url": "https://github.com/VictoriaMetrics/VictoriaMetrics/releases",
+        "github": "VictoriaMetrics/VictoriaMetrics",
         "regex": "vmutils-windows-amd64-v([\\d.]+)\\.zip"
     },
     "autoupdate": {
@@ -56,3 +50,4 @@
         "if (Get-Service vmagent -ErrorAction SilentlyContinue) { try { Stop-Service vmagent -ErrorAction SilentlyContinue } catch {}; & nssm remove vmagent confirm | Out-Null }"
     ]
 }
+
