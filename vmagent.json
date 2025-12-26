@@ -1,15 +1,18 @@
 {
-    "version": "1.108.1",
+    "version": "1.132.0",
     "description": "vmagent",
     "homepage": "https://docs.victoriametrics.com/vmagent/",
     "license": "Apache-2.0",
     "depends": "nssm",
     "architecture": {
         "64bit": {
-            "url": "https://github.com/VictoriaMetrics/VictoriaMetrics/releases/download/v1.108.1/vmutils-windows-amd64-v1.108.1.zip",
-            "hash": "d69ad7221d6705ad3df6ad723f4f20cedb13711d320f5c82f2951c98446c35fd",
+            "url": "https://github.com/VictoriaMetrics/VictoriaMetrics/releases/download/v1.132.0/vmutils-windows-amd64-v1.132.0.zip",
+            "hash": "4a8a201d93d0ede589107b2771a2517a518138feaa49c7156ea21bb610f1f97c",
             "bin": [
-                [ "vmagent-windows-amd64-prod.exe", "vmagent" ]
+                [
+                    "vmagent-windows-amd64-prod.exe",
+                    "vmagent"
+                ]
             ]
         }
     },
