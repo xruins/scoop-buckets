@@ -14,8 +14,7 @@
         }
     },
     "checkver": {
-        "github": "https://github.com/VictoriaMetrics/VictoriaMetrics",
-        "regex": "v([\\d.]+)"
+        "github": "https://github.com/VictoriaMetrics/VictoriaMetrics"
     },
     "autoupdate": {
         "architecture": {
