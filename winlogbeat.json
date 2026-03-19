@@ -9,7 +9,7 @@
             "url": "https://artifacts.elastic.co/downloads/beats/winlogbeat/winlogbeat-9.3.1-windows-x86_64.zip",
             "hash": "a416288bae149b359b232791cf6a06c78266e45d7bbd97f2785b22bf8292807a",
             "bin": [
-                "winlogbeat-9.3.1-windows-x86_64\\winlogbeat.exe"
+                "winlogbeat.exe"
             ]
         }
     },
@@ -25,10 +25,12 @@
         }
     },
     "post_install": [
+        "Copy-Item \"$dir\\winlogbeat-*-windows-x86_64\\winlogbeat.exe\" \"$dir\\winlogbeat.exe\" -Force | Out-Null",
         "if (!(is_admin)) { error 'Service registration requires Administrator privileges.'; exit 1 }",
         "if (Get-Service winlogbeat -ErrorAction SilentlyContinue) { try { Stop-Service winlogbeat -ErrorAction SilentlyContinue } catch {}; & nssm remove winlogbeat confirm | Out-Null }",
-        "& nssm install winlogbeat \"$dir\\winlogbeat-*-windows-x86_64\\winlogbeat.exe\" | Out-Null",
-        "& nssm set winlogbeat AppDirectory \"$dir\" | Out-Null",
+        "$currentPath = \"$scoopdir\\apps\\winlogbeat\\current\\winlogbeat.exe\"",
+        "& nssm install winlogbeat \"$currentPath\" \"-c\" \"$scoopdir\\persist\\winlogbeat\\winlogbeat.yml\" | Out-Null",
+        "& nssm set winlogbeat AppDirectory \"$scoopdir\\persist\\winlogbeat\" | Out-Null",
         "& nssm set winlogbeat DisplayName \"Winlogbeat\" | Out-Null",
         "& nssm set winlogbeat Description \"Winlogbeat ships Windows event logs to Elasticsearch.\" | Out-Null",
         "& nssm set winlogbeat Start SERVICE_DEMAND_START | Out-Null",
