@@ -1,0 +1,41 @@
+{
+    "version": "9.3.1",
+    "description": "Winlogbeat is a Windows event log shipper for Beats",
+    "homepage": "https://www.elastic.co/beats/winlogbeat",
+    "license": "Elastic-2.0",
+    "depends": "nssm",
+    "architecture": {
+        "64bit": {
+            "url": "https://artifacts.elastic.co/downloads/beats/winlogbeat/winlogbeat-9.3.1-windows-x86_64.zip",
+            "hash": "a416288bae149b359b232791cf6a06c78266e45d7bbd97f2785b22bf8292807a",
+            "bin": [
+                "winlogbeat-9.3.1-windows-x86_64\\winlogbeat.exe"
+            ]
+        }
+    },
+    "checkver": {
+        "url": "https://www.elastic.co/downloads/beats/winlogbeat",
+        "regex": "winlogbeat-([\\d.]+)-windows"
+    },
+    "autoupdate": {
+        "architecture": {
+            "64bit": {
+                "url": "https://artifacts.elastic.co/downloads/beats/winlogbeat/winlogbeat-$version-windows-x86_64.zip"
+            }
+        }
+    },
+    "post_install": [
+        "if (!(is_admin)) { error 'Service registration requires Administrator privileges.'; exit 1 }",
+        "if (Get-Service winlogbeat -ErrorAction SilentlyContinue) { try { Stop-Service winlogbeat -ErrorAction SilentlyContinue } catch {}; & nssm remove winlogbeat confirm | Out-Null }",
+        "& nssm install winlogbeat \"$dir\\winlogbeat-*-windows-x86_64\\winlogbeat.exe\" | Out-Null",
+        "& nssm set winlogbeat AppDirectory \"$dir\" | Out-Null",
+        "& nssm set winlogbeat DisplayName \"Winlogbeat\" | Out-Null",
+        "& nssm set winlogbeat Description \"Winlogbeat ships Windows event logs to Elasticsearch.\" | Out-Null",
+        "& nssm set winlogbeat Start SERVICE_DEMAND_START | Out-Null",
+        "Write-Host 'Service installed (not started). Configure winlogbeat.yml and start service with: nssm start winlogbeat' -ForegroundColor Yellow"
+    ],
+    "pre_uninstall": [
+        "if (!(is_admin)) { error 'Service removal requires Administrator privileges.'; exit 1 }",
+        "if (Get-Service winlogbeat -ErrorAction SilentlyContinue) { try { Stop-Service winlogbeat -ErrorAction SilentlyContinue } catch {}; & nssm remove winlogbeat confirm | Out-Null }"
+    ]
+}
