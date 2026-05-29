@@ -1,14 +1,14 @@
 {
-    "version": "9.4.1",
+    "version": "9.4.2",
     "description": "Winlogbeat is a Windows event log shipper for Beats",
     "homepage": "https://www.elastic.co/beats/winlogbeat",
     "license": "Elastic-2.0",
     "depends": "nssm",
     "architecture": {
         "64bit": {
-            "url": "https://artifacts.elastic.co/downloads/beats/winlogbeat/winlogbeat-9.4.1-windows-x86_64.zip",
-            "hash": "f6b5692654695fbe79299985b8212f8315ddd92fd1346f135dd7657834cbddcc",
-            "extract_dir": "winlogbeat-9.4.1-windows-x86_64",
+            "url": "https://artifacts.elastic.co/downloads/beats/winlogbeat/winlogbeat-9.4.2-windows-x86_64.zip",
+            "hash": "d914d4800ff32fad3a2c42f8c80555b73dc073ccd4269fe5371d16ea59a32d01",
+            "extract_dir": "winlogbeat-9.4.2-windows-x86_64",
             "bin": "winlogbeat.exe"
         }
     },
