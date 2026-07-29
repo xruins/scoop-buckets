@@ -34,6 +34,11 @@
         "& nssm set vmagent DisplayName \"VictoriaMetrics Agent (vmagent)\" | Out-Null",
         "& nssm set vmagent Description \"Collects metrics and sends them to VictoriaMetrics or Prometheus.\" | Out-Null",
         "& nssm set vmagent Start SERVICE_AUTO_START | Out-Null",
+        "$persistDir = \"$scoopdir\\persist\\vmagent\"",
+        "$appParamsFile = \"$persistDir\\AppParameters.txt\"",
+        "$appEnvExtraFile = \"$persistDir\\AppEnvironmentExtra.txt\"",
+        "if (Test-Path $appParamsFile) { $appParams = (Get-Content -Path $appParamsFile -Raw).Trim(); & nssm set vmagent AppParameters $appParams | Out-Null; Write-Host \"Restored AppParameters from persisted file '$appParamsFile': $appParams\" -ForegroundColor Yellow }",
+        "if (Test-Path $appEnvExtraFile) { $appEnvExtraLines = @(Get-Content -Path $appEnvExtraFile); & nssm set vmagent AppEnvironmentExtra ($appEnvExtraLines -join \"`r`n\") | Out-Null; Write-Host \"Restored AppEnvironmentExtra from persisted file '$appEnvExtraFile':`n$($appEnvExtraLines -join \"`n\")\" -ForegroundColor Yellow }",
         "Write-Host 'Service registered. Configure flags with: nssm edit vmagent' -ForegroundColor Yellow"
     ],
     "pre_uninstall": [
