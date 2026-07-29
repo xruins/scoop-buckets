@@ -43,6 +43,15 @@
     ],
     "pre_uninstall": [
         "if (!(is_admin)) { error 'Service removal requires Administrator privileges.'; exit 1 }",
-        "if (Get-Service vmagent -ErrorAction SilentlyContinue) { try { Stop-Service vmagent -ErrorAction SilentlyContinue } catch {}; & nssm remove vmagent confirm | Out-Null }"
+        "if (Get-Service vmagent -ErrorAction SilentlyContinue) {",
+        "    $persistDir = \"$scoopdir\\persist\\vmagent\"",
+        "    if (!(Test-Path $persistDir)) { New-Item -ItemType Directory -Path $persistDir -Force | Out-Null }",
+        "    $appParams = & nssm get vmagent AppParameters 2>$null",
+        "    $appEnvExtra = & nssm get vmagent AppEnvironmentExtra 2>$null",
+        "    if ($appParams) { $appParamsFile = \"$persistDir\\AppParameters.txt\"; Set-Content -Path $appParamsFile -Value $appParams -Encoding UTF8; Write-Host \"Saved AppParameters to persist directory: $appParamsFile\" -ForegroundColor Yellow }",
+        "    if ($appEnvExtra) { $appEnvExtraFile = \"$persistDir\\AppEnvironmentExtra.txt\"; Set-Content -Path $appEnvExtraFile -Value $appEnvExtra -Encoding UTF8; Write-Host \"Saved AppEnvironmentExtra to persist directory: $appEnvExtraFile\" -ForegroundColor Yellow }",
+        "    try { Stop-Service vmagent -ErrorAction SilentlyContinue } catch {}",
+        "    & nssm remove vmagent confirm | Out-Null",
+        "}"
     ]
 }
