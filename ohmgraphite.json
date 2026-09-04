@@ -20,6 +20,19 @@
     "uninstaller": {
         "script": "Start-Process -Wait \"$dir\\OhmGraphite.exe\" \"uninstall\""
     },
+    "pre_uninstall": [
+        "if (Get-Service OhmGraphite -ErrorAction SilentlyContinue) {",
+        "    $persistDir = \"$scoopdir\\persist\\ohmgraphite\"",
+        "    if (!(Test-Path $persistDir)) { New-Item -ItemType Directory -Path $persistDir -Force | Out-Null }",
+        "    $runStateFile = \"$persistDir\\WasRunning.txt\"",
+        "    if ((Get-Service OhmGraphite).Status -eq 'Running') { Set-Content -Path $runStateFile -Value '1' -Encoding ASCII; Write-Host 'Service was running; will restart after upgrade.' -ForegroundColor Yellow } elseif (Test-Path $runStateFile) { Remove-Item $runStateFile -Force }",
+        "    Start-Process -Wait \"$dir\\OhmGraphite.exe\" 'stop'",
+        "}"
+    ],
+    "post_install": [
+        "$runStateFile = \"$scoopdir\\persist\\ohmgraphite\\WasRunning.txt\"",
+        "if (Test-Path $runStateFile) { Start-Process -Wait \"$dir\\OhmGraphite.exe\" 'start'; Remove-Item $runStateFile -Force; Write-Host 'Service restarted (was running before upgrade).' -ForegroundColor Yellow }"
+    ],
     "checkver": {
         "github": "https://github.com/nickbabcock/OhmGraphite"
     },

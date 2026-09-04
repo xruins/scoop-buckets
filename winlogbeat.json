@@ -33,10 +33,18 @@
         "& nssm set winlogbeat DisplayName \"Winlogbeat\" | Out-Null",
         "& nssm set winlogbeat Description \"Winlogbeat ships Windows event logs to Elasticsearch.\" | Out-Null",
         "& nssm set winlogbeat Start SERVICE_DEMAND_START | Out-Null",
-        "Write-Host 'Service installed (not started). Configure winlogbeat.yml and start service with: nssm start winlogbeat' -ForegroundColor Yellow"
+        "$runStateFile = \"$scoopdir\\persist\\winlogbeat\\WasRunning.txt\"",
+        "if (Test-Path $runStateFile) { Start-Service winlogbeat; Remove-Item $runStateFile -Force; Write-Host 'Service restarted (was running before upgrade).' -ForegroundColor Yellow } else { Write-Host 'Service installed (not started). Configure winlogbeat.yml and start service with: nssm start winlogbeat' -ForegroundColor Yellow }"
     ],
     "pre_uninstall": [
         "if (!(is_admin)) { error 'Service removal requires Administrator privileges.'; exit 1 }",
-        "if (Get-Service winlogbeat -ErrorAction SilentlyContinue) { try { Stop-Service winlogbeat -ErrorAction SilentlyContinue } catch {}; & nssm remove winlogbeat confirm | Out-Null }"
+        "if (Get-Service winlogbeat -ErrorAction SilentlyContinue) {",
+        "    $persistDir = \"$scoopdir\\persist\\winlogbeat\"",
+        "    if (!(Test-Path $persistDir)) { New-Item -ItemType Directory -Path $persistDir -Force | Out-Null }",
+        "    $runStateFile = \"$persistDir\\WasRunning.txt\"",
+        "    if ((Get-Service winlogbeat).Status -eq 'Running') { Set-Content -Path $runStateFile -Value '1' -Encoding ASCII; Write-Host 'Service was running; will restart after upgrade.' -ForegroundColor Yellow } elseif (Test-Path $runStateFile) { Remove-Item $runStateFile -Force }",
+        "    try { Stop-Service winlogbeat -ErrorAction SilentlyContinue } catch {}",
+        "    & nssm remove winlogbeat confirm | Out-Null",
+        "}"
     ]
 }

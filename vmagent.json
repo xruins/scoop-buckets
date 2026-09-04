@@ -39,6 +39,8 @@
         "$appEnvExtraFile = \"$persistDir\\AppEnvironmentExtra.txt\"",
         "if (Test-Path $appParamsFile) { $appParams = (Get-Content -Path $appParamsFile -Raw).Trim(); & nssm set vmagent AppParameters $appParams | Out-Null; Write-Host \"Restored AppParameters from persisted file '$appParamsFile': $appParams\" -ForegroundColor Yellow }",
         "if (Test-Path $appEnvExtraFile) { $appEnvExtraLines = @(Get-Content -Path $appEnvExtraFile); & nssm set vmagent AppEnvironmentExtra ($appEnvExtraLines -join \"`r`n\") | Out-Null; Write-Host \"Restored AppEnvironmentExtra from persisted file '$appEnvExtraFile':`n$($appEnvExtraLines -join \"`n\")\" -ForegroundColor Yellow }",
+        "$runStateFile = \"$persistDir\\WasRunning.txt\"",
+        "if (Test-Path $runStateFile) { Start-Service vmagent; Remove-Item $runStateFile -Force; Write-Host 'Service restarted (was running before upgrade).' -ForegroundColor Yellow }",
         "Write-Host 'Service registered. Configure flags with: nssm edit vmagent' -ForegroundColor Yellow"
     ],
     "pre_uninstall": [
@@ -50,6 +52,8 @@
         "    $appEnvExtra = & nssm get vmagent AppEnvironmentExtra 2>$null",
         "    if ($appParams) { $appParamsFile = \"$persistDir\\AppParameters.txt\"; Set-Content -Path $appParamsFile -Value $appParams -Encoding UTF8; Write-Host \"Saved AppParameters to persist directory: $appParamsFile\" -ForegroundColor Yellow }",
         "    if ($appEnvExtra) { $appEnvExtraFile = \"$persistDir\\AppEnvironmentExtra.txt\"; Set-Content -Path $appEnvExtraFile -Value $appEnvExtra -Encoding UTF8; Write-Host \"Saved AppEnvironmentExtra to persist directory: $appEnvExtraFile\" -ForegroundColor Yellow }",
+        "    $runStateFile = \"$persistDir\\WasRunning.txt\"",
+        "    if ((Get-Service vmagent -ErrorAction SilentlyContinue).Status -eq 'Running') { Set-Content -Path $runStateFile -Value '1' -Encoding ASCII; Write-Host 'Service was running; will restart after upgrade.' -ForegroundColor Yellow } elseif (Test-Path $runStateFile) { Remove-Item $runStateFile -Force }",
         "    try { Stop-Service vmagent -ErrorAction SilentlyContinue } catch {}",
         "    & nssm remove vmagent confirm | Out-Null",
         "}"
